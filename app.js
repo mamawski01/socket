@@ -19,6 +19,8 @@ app.get('/about', (req, res, next) => {
 
 const io = require('socket.io')(server);
 
+let connectedPeers = [];
+
 io.on('connection', (socket) => {
   //automatically connected to the server
   console.log('A user connected ' + socket.id);
@@ -27,12 +29,16 @@ io.on('connection', (socket) => {
     // socket.broadcast.emit('group-chat-message', data);
     io.emit('group-chat-message', data); //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   });
-});
 
-//server-side
-// io.on('connection', (socket) => {
-//   socket.broadcast.emit('hello', 'world');
-// });
+  socket.on('register-new-user', (userData) => {
+    const { username } = userData;
+
+    const newPeer = { username, socketId: socket.id };
+    connectedPeers = [...connectedPeers, newPeer];
+    console.log('registered new user');
+    console.log(connectedPeers);
+  });
+});
 
 server.listen(port, () => {
   console.log(`Server is running on port ${port}`);
